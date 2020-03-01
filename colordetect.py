@@ -65,11 +65,11 @@ def getColor():
 
 		
 		print(
-			f"Average HSV Values" 
-			f"+-------------------"
-			f"| {"Hue":<11}: {avg_hsv['h']:>5}"
-			f"| {"Saturation":<11}: {avg_hsv['s']:>5}"
-			f"| {"Value":<11}: {avg_hsv['v']:>5}"
+			f"Average HSV Values\n" 
+			f"+-------------------\n"
+			f"| {'Hue':<11}: {avg_hsv['h']:>5}\n"
+			f"| {'Saturation':<11}: {avg_hsv['s']:>5}\n"
+			f"| {'Value':<11}: {avg_hsv['v']:>5}\n"
 			)
 			
 	else:

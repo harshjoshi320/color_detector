@@ -11,7 +11,7 @@ class Servo:
         self.pwm.start(self.position)
 
     def setAngle(self, angle):
-        duty = (angle/180)*10 + 2.5
+        duty = (angle/18) + 2.5
         self.pwm.changeDutyCycle(duty)
     
     def stop(self):

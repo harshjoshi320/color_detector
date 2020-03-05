@@ -105,6 +105,8 @@ def getColor(hsv):
 			return 3
 		else:
 			return -1
+	else:
+		return -1
 
 if __name__=='__main__':
 	image = captureImage(-1)

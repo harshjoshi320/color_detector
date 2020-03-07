@@ -16,4 +16,4 @@ class Arm():
 
 	def clawClose(self):
 		self.claw.setAngle(55)
-		self.claw.stop
+		self.claw.stop()

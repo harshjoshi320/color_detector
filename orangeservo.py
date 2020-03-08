@@ -4,11 +4,10 @@ from pyA20.gpio import port
 
 class Servo:
     def __init__(self, port, frequency=50):
-        self.position = 0
         self.port = port
         self.frequency = frequency
         self.pwm = OrangePwm(self.frequency, self.port)
-        self.pwm.start(self.position)
+        self.pwm.start(0)
 
     def setAngle(self, angle):
         duty = round(((angle/18) + 2.5),1)

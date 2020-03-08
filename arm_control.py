@@ -16,7 +16,7 @@ class Arm():
 		self.claw.setAngle(0); sleep(1)
 		self.wrist.setAngle(0); sleep(1)
 		self.elbow.setAngle(0); sleep(1)
-		self.shoulder.setAngle(25); sleep(1)
+		# self.shoulder.setAngle(25); sleep(1)
 
 
 	def stopAll(self):
@@ -24,7 +24,7 @@ class Arm():
 		self.wrist.stop()
 		self.elbow.stop()
 		self.shoulder.stop()
-		
+
 
 	def test(self):
 		print("[INFO] Testing Shoulder")
@@ -83,6 +83,7 @@ class Arm():
 	
 	def pick(self, pos=0):
 		positions = [0, 25, 80]
+		self.initialize()
 		self.shoulder.setAngle(positions[pos]); sleep(1)
 		self.claw.setAngle(0); sleep(1)
 		self.elbow.setAngle(55); sleep(1)
@@ -95,6 +96,7 @@ class Arm():
 		self.elbow.setAngle(40); sleep(1)
 		self.claw.setAngle(0); sleep(1)
 		self.elbow.setAngle(0); sleep(1)
+		self.initialize()
 
 
 
@@ -103,6 +105,11 @@ if __name__ == '__main__':
 	arm = Arm([ port.PA6, port.PA12, port.PA3, port.PA11])
 	#arm.test()
 	arm.initialize()
-	arm.pick()
+	arm.pick(0)
+	sleep(2)
+	arm.pick(1)
+	sleep(2)
+	arm.pick(2)
+	sleep(2)
 	arm.drop()
 	arm.stopAll()

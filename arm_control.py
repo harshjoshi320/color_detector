@@ -12,6 +12,7 @@ class Arm():
 		self.shoulder = Servo(ports[3])
 
 	def test(self):
+		print("[INFO] Test Shoulder")
 		self.shoulder.setAngle(0)
 		sleep(1)
 		self.shoulder.setAngle(30)
@@ -24,6 +25,7 @@ class Arm():
 		sleep(1)
 		self.shoulder.stop()
 		
+		print("[INFO] Test Elbow")
 		self.elbow.setAngle(0)
 		sleep(1)
 		self.elbow.setAngle(25)
@@ -34,6 +36,7 @@ class Arm():
 		sleep(1)
 		self.elbow.stop()
 
+		print("[INFO] Test Wrist")
 		self.wrist.setAngle(0)
 		sleep(1)
 		self.wrist.setAngle(20)
@@ -42,6 +45,7 @@ class Arm():
 		sleep(1)
 		self.wrist.stop()
 
+		print("[INFO] Test Claw")
 		self.clawOpen()
 		sleep(1)
 		self.clawClose()

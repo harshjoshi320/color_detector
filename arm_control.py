@@ -2,13 +2,49 @@ from orangepwm import *
 from orangeservo import Servo
 from pyA20.gpio import gpio
 from pyA20.gpio import port
+from time import sleep
 
 class Arm():
-	def __init__(self, claw, wrist, elbow, shoulder):
-		self.claw = claw 
-		self.wrist = wrist
-		self.elbow = elbow
-		self.shoulder = shoulder
+	def __init__(self, ports):
+		self.claw = Servo(ports[0]) 
+		self.wrist = Servo(ports[1])
+		self.elbow = Servo(ports[2])
+		self.shoulder = Servo(ports[3])
+
+	def test(self):
+		self.shoulder.setAngle(0)
+		sleep(1)
+		self.shoulder.setAngle(30)
+		sleep(1)
+		self.shoulder.setAngle(60)
+		sleep(1)
+		self.shoulder.setAngle(90)
+		sleep(1)
+		self.shoulder.setAngle(45)
+		sleep(1)
+		self.shoulder.stop()
+		
+		self.elbow.setAngle(0)
+		sleep(1)
+		self.elbow.setAngle(25)
+		sleep(1)
+		self.elbow.setAngle(45)
+		sleep(1)
+		self.elbow.setAngle(0)
+		sleep(1)
+		self.elbow.stop()
+
+		self.wrist.setAngle(0)
+		sleep(1)
+		self.wrist.setAngle(20)
+		sleep(1)
+		self.wrist.setAngle(0)
+		sleep(1)
+		self.wrist.stop()
+
+		self.clawOpen()
+		sleep(1)
+		self.clawClose()
 
 	def clawOpen(self):
 		self.claw.setAngle(0)

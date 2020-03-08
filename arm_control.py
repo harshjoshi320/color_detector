@@ -11,18 +11,20 @@ class Arm():
 		self.elbow = Servo(ports[2])
 		self.shoulder = Servo(ports[3])
 
+
 	def initialize(self):
 		self.claw.setAngle(0); sleep(1)
 		self.wrist.setAngle(0); sleep(1)
 		self.elbow.setAngle(0); sleep(1)
 		self.shoulder.setAngle(25); sleep(1)
 
+
 	def stopAll(self):
 		self.claw.stop()
 		self.wrist.stop()
 		self.elbow.stop()
 		self.shoulder.stop()
-
+		
 
 	def test(self):
 		print("[INFO] Testing Shoulder")
@@ -78,19 +80,22 @@ class Arm():
 
 		print("[INFO] Tests Finished")
 
+	
 	def pick(self, pos=0):
 		positions = [0, 25, 80]
 		self.shoulder.setAngle(positions[pos]); sleep(1)
 		self.claw.setAngle(0); sleep(1)
 		self.elbow.setAngle(55); sleep(1)
-                self.claw.setAngle(50); sleep(1)
-                self.elbow.setAngle(0); sleep(1)
+		self.claw.setAngle(50); sleep(1)
+		self.elbow.setAngle(0); sleep(1)
+
 
 	def drop(self):
 		self.shoulder.setAngle(120); sleep(1)
 		self.elbow.setAngle(40); sleep(1)
 		self.claw.setAngle(0); sleep(1)
 		self.elbow.setAngle(0); sleep(1)
+
 
 
 if __name__ == '__main__':

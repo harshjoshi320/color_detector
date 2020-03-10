@@ -140,25 +140,37 @@ if __name__=='__main__':
 
 	print(
 		f"\n#### Starting the color sorter/picker program ####\n"
-		f"\n[INFO]----\n"
-		f"\nThis program will ask the user to choose one of the three colors."
+		f"\n[DESC]----\n"
+		f"\nThis user will be asked to choose a color."
 		f"\nThe colors are indexed as:"
 		f"\n	0: Red"
 		f"\n	1: Yellow"
 		f"\n	2: Green"
 		f"\n	3: Blue"
-		f"\nOnly three of these colors are available to pick from ( 0, 2, 3)\n"
-		f"\n----[INFO]\n"
+		f"\nOnly three of these colors are available to pick from [ 0  2  3 ]\n"
+		f"\nThree Regions Of Interest or ROIs are extracted from the captured image."
+		f"\nThese ROIs will be examined to find the object with the choosen color."
+		f"\nOnce the position is determined the arm will signaled to extract the object."
+		f"\n----[DESC]\n"
 		)
 
 	print(f"## Choose the color to be picked")
-	choice = input("\nEnter the color index [default 0]: ")
 
-	if choice not in [ 0, 2, 3]:
+
+	try:
+		choice = int(input("\nEnter the color index [default 0]: "))
+
+		if choice not in [ 0, 1, 2, 3]:
+			print(
+				f"[WARN] Invalid user input\n"
+				f"[WARN] Using default color index [0]"
+				)
+			choice = 0
+	except ValueError:
 		print(
-			f"[WARN] Invalid user input\n"
-			f"[WARN] Using default color index [0]"
-			)
+				f"[WARN] Invalid user input\n"
+				f"[WARN] Using default color index [0]"
+				)
 		choice = 0
 
 	# image = captureImage(-1)

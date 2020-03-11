@@ -14,10 +14,12 @@ class Arm():
 
 
     def initialize(self):
+        print(f"[INFO] Initializing...")
         self.claw.setAngle(0); sleep(0.5)
         self.wrist.setAngle(0); sleep(0.5)
         self.elbow.setAngle(0); sleep(0.5)
         self.stopAll()
+        print(f"    ...All servos in initial positions.")
         # self.shoulder.setAngle(25); sleep(1)
 
 
@@ -84,7 +86,7 @@ class Arm():
 
     
     def pick(self, pos=0):
-        print(f"[INFO] Start Routine: Pick At Pos-{pos}...", end='')
+        print(f"[INFO] Start Routine: Pick At Pos-{pos}... ", end='')
         positions = [0, 25, 50]
         self.initialize()
         self.shoulder.setAngle(positions[pos]); sleep(1)
@@ -114,18 +116,19 @@ class Arm():
 if __name__ == '__main__':
     gpio.init()
     arm = Arm([ port.PA6, port.PA12, port.PA3, port.PA11])
-    #arm.test()
-    arm.pick(0)
-    arm.drop()
-    arm.stopAll()
-    sleep(2)
-    arm.pick(1)
-    arm.drop()
-    arm.stopAll()
-    sleep(2)
-    arm.pick(2)
-    arm.drop()
-    arm.stopAll()
-    sleep(2)
+    arm.initialize()
+    arm.test()
+    # arm.pick(0)
+    # arm.drop()
+    # arm.stopAll()
+    # sleep(2)
+    # arm.pick(1)
+    # arm.drop()
+    # arm.stopAll()
+    # sleep(2)
+    # arm.pick(2)
+    # arm.drop()
+    # arm.stopAll()
+    # sleep(2)
     arm.stopAll()
 

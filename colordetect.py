@@ -109,21 +109,21 @@ def getColor(hsv):
 	else:
 		return -1
 
-class Arm():
-	def initialize(self):
-		print(f"[INFO] Initializing...")
-		sleep(2)
-		print(f"	...All servos in initial positions.")
+# class ArmDummy():
+# 	def initialize(self):
+# 		print(f"[INFO] Initializing...")
+# 		sleep(2)
+# 		print(f"	...All servos in initial positions.")
 	
-	def pick(self, pos=0):
-		print(f"[INFO] Start Routine: Pick At Pos-{pos}...", end='')
-		sleep(4)
-		print(" Picked")
+# 	def pick(self, pos=0):
+# 		print(f"[INFO] Start Routine: Pick At Pos-{pos}...", end='')
+# 		sleep(4)
+# 		print(" Picked")
 
-	def drop(self):
-		print(f"[INFO] Start Routine: Drop... ", end='')
-		sleep(4)
-		print(" Dropped")
+# 	def drop(self):
+# 		print(f"[INFO] Start Routine: Drop... ", end='')
+# 		sleep(4)
+# 		print(" Dropped")
 
 
 if __name__=='__main__':

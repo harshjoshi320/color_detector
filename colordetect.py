@@ -1,7 +1,11 @@
-import sys
+# import sys
 import cv2 as cv
 import numpy as np
 from time import sleep
+from orangepwm import *
+from orangeservo import Servo
+from pyA20.gpio import gpio, port
+from arm_control import Arm
 # from matplotlib import pyplot as plt
 
 
@@ -34,10 +38,10 @@ def extractROI(rangey, rangex, image):
 		roi = image[rangey[0]:rangey[1], rangex[0]:rangex[1]]
 		# print("[INFO] Extracted ROI")
 
-		# # Display the extracted ROI
-		# cv.imshow("ROI",roi)
-		# cv.waitKey(0)
-		# cv.destroyAllWindows()
+		# Display the extracted ROI
+		cv.imshow("ROI",roi)
+		cv.waitKey(0)
+		cv.destroyAllWindows()
 		return roi
 	else:
 		print("[WARN] No Image Found!")
@@ -127,14 +131,22 @@ def getColor(hsv):
 
 
 if __name__=='__main__':
+	
+	# 
+	# positions:
+	# 
+	# pos 0:	[y0, y1], [x0, x1]
+	# pos 1:	[y0, y1], [x0, x1]
+	# pos 2:	[y0, y1], [x0, x1]
+	# 
 
 	positions = (
-		([117,184], [91,160]),
-		([117,184], [235,305]),
-		([117,184], [380,454])
+		([384, 430], [61, 121]),
+		([284, 333], [314, 365]),
+		([104, 160], [470, 530])
 		)
 
-	arm = Arm()
+	arm = Arm([ port.PA6, port.PA12, port.PA3, port.PA11])
 
 	arm.initialize()
 
@@ -173,8 +185,8 @@ if __name__=='__main__':
 				)
 		choice = 0
 
-	# image = captureImage(-1)
-	image = cv.imread("../sample.png")
+	image = captureImage(1)
+	# image = cv.imread("../sample.png")
 	
 	rois = list()
 

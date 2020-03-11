@@ -6,6 +6,7 @@ from time import sleep
 
 class Arm():
     def __init__(self, ports):
+        gpio.init()
         self.claw = Servo(ports[0])
         self.wrist = Servo(ports[1])
         self.elbow = Servo(ports[2])
@@ -16,6 +17,7 @@ class Arm():
         self.claw.setAngle(0); sleep(0.5)
         self.wrist.setAngle(0); sleep(0.5)
         self.elbow.setAngle(0); sleep(0.5)
+        self.stopAll()
         # self.shoulder.setAngle(25); sleep(1)
 
 
@@ -86,19 +88,23 @@ class Arm():
         positions = [0, 25, 50]
         self.initialize()
         self.shoulder.setAngle(positions[pos]); sleep(1)
+        self.shoulder.stop()
         self.claw.setAngle(0); sleep(1)
+        self.wrist.setAngle(0); sleep(1)
         self.elbow.setAngle(70); sleep(1)
         self.claw.setAngle(50); sleep(1)
-        self.wrist.setAngle(20); sleep(1)
+        self.wrist.stop()
         self.elbow.setAngle(0); sleep(1)
+        self.elbow.stop()
         print("Picked")
 
 
     def drop(self):
         print(f"[INFO] Start Routine: Drop... ", end='')
-        self.shoulder.setAngle(120); sleep(1)
-        self.elbow.setAngle(40); sleep(1)
         self.wrist.setAngle(0); sleep(1)
+        self.shoulder.setAngle(120); sleep(1)
+        self.shoulder.stop()
+        self.elbow.setAngle(40); sleep(1)
         self.claw.setAngle(0); sleep(0.5)
         self.initialize()
         print("Dropped")

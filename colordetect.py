@@ -1,6 +1,7 @@
 # import sys
 import cv2 as cv
 import numpy as np
+import pygame, pygame.camera
 from time import sleep
 from orangepwm import *
 from orangeservo import Servo
@@ -15,17 +16,22 @@ def captureImage(dev_index):
 	Captures image and return an numpy.ndarray object
 	'''
 	# Initialize camera as videocapture object
-	camera = cv.VideoCapture(dev_index)
+	# camera = cv.VideoCapture(dev_index)
 
-	# Captures image and returns a boolean and image
-	retval, img = camera.read()
+	# # Captures image and returns a boolean and image
+	# retval, img = camera.read()
 
-	if retval:
-		print("[INFO] Image Captured")
-		return img
-	else:
-		print("[WARN] Image Not Captured")
-		return None
+	# if retval:
+	# 	print("[INFO] Image Captured")
+	# 	return img
+	# else:
+	# 	print("[WARN] Image Not Captured")
+	# 	return None
+	
+	camera = pygame.camera.Camera(f'/dev/video{dev_index}', (640, 480))
+	camera.start()
+	image = camera.get_image()
+	pygame.image.save(image, "/tmp/captured_image.png")
 
 def extractROI(rangey, rangex, image):
 	'''
@@ -42,95 +48,73 @@ def extractROI(rangey, rangex, image):
 		cv.imshow("ROI",roi)
 		cv.waitKey(0)
 		cv.destroyAllWindows()
+		# cv.imwrite(f"{str(rangex[0])}.png", roi)
 		return roi
 	else:
 		print("[WARN] No Image Found!")
 		return None
 
-def getAvgHSV(img):
+def getAvgBGR(img):
 	'''
-	list getAvgHSV(numpy.ndarray):
-	Returns average HSV values of the image as a dictionary
-	{'h':<val>, 's':<val>, 'v':<val>}
+	list getAvgBGR(numpy.ndarray):
+	Returns average BGR values of the image as a dictionary
+	{'b':<val>, 'g':<val>, 'r':<val>}
 	'''
 	# Get image size as a list
 	img_size = img.shape[:2]
 
-	# Converting Colorspace from BGR to HSV
-	# It is easier to operate in HSV colorspace 
-	hsv_img = cv.cvtColor(img, cv.COLOR_BGR2HSV)
-
 	hists = list()
-	# HSV values range from [0,0,0] to [179,255,255] 
-	hsv_lmts = {'h':180,'s':256,'v':256}
 
-	for i, prop in enumerate(hsv_lmts):
-		hists.append(cv.calcHist([hsv_img],[i],None,[hsv_lmts[prop]],[0,hsv_lmts[prop]]))
+	for i in range(3):
+		hists.append(cv.calcHist([img],[i],None,[256],[0,256]))
 
 	# print("[INFO] Calculated Histrograms")
 	
-	avg_hsv = {'h':0, 's':0, 'v':0}
+	avg_bgr = {'b':0, 'g':0, 'r':0}
 
-	for i, prop in enumerate(hsv_lmts):
+	for i,prop in enumerate(avg_bgr):
 		prop_sum = 0
-		for j in range(0, hsv_lmts[prop]):
+		for j in range(0, 256):
 			prop_sum = prop_sum + (hists[i][j][0] * j)
-		avg_hsv[prop] = round(prop_sum/(img_size[0]*img_size[1]))
+		avg_bgr[prop] = round(prop_sum/(img_size[0]*img_size[1]))
 
-	
-	# print(
-	# 	f"Average HSV Values\n" 
-	# 	f"+-------------------\n"
-	# 	f"| {'Hue':<11}: {avg_hsv['h']:>5}\n"
-	# 	f"| {'Saturation':<11}: {avg_hsv['s']:>5}\n"
-	# 	f"| {'Value':<11}: {avg_hsv['v']:>5}\n"
-	# 	)
+	print(
+			f"Average BGR Values\n" 
+			f"+-------------------\n"
+			f"| {'B':<11}: {avg_bgr['b']:>5}\n"
+			f"| {'G':<11}: {avg_bgr['g']:>5}\n"
+			f"| {'R':<11}: {avg_bgr['r']:>5}\n"
+			)
 
-	return avg_hsv
+	print(avg_bgr)
+	return avg_bgr
 
-def getColor(hsv):
+
+def getColor(bgr):
 	'''
 	int getColor(list[3]):
-	Takes hsv values as a dictionary and returns an integer
+	Takes bgr values as a dictionary and returns an integer
 	corresponding to the color.
 	red: 0
-	yellow: 1
-	green: 2
-	blue: 3
+	green: 1
+	blue: 2
 	other: -1
 	'''
-	if (hsv['s'] >= 200) and (hsv['v'] >= 200):
-		if hsv['h'] in range(0, 7) or hsv in range(170, 180):
-			return 0
-		elif hsv['h'] in range(25, 34):
-			return 1
-		elif hsv['h'] in range(40, 71):
-			return 2
-		elif hsv['h'] in range(85, 134):
-			return 3
-		else:
-			return -1
+	if bgr['b']>bgr['g'] and bgr['b']>bgr['r']:
+		return 2
+	elif bgr['g']>bgr['b'] and bgr['g']>bgr['r']:
+		return 1
+	elif bgr['r']>bgr['b'] and bgr['r']>bgr['g']:
+		return 0
 	else:
 		return -1
 
-# class ArmDummy():
-# 	def initialize(self):
-# 		print(f"[INFO] Initializing...")
-# 		sleep(2)
-# 		print(f"	...All servos in initial positions.")
-	
-# 	def pick(self, pos=0):
-# 		print(f"[INFO] Start Routine: Pick At Pos-{pos}...", end='')
-# 		sleep(4)
-# 		print(" Picked")
-
-# 	def drop(self):
-# 		print(f"[INFO] Start Routine: Drop... ", end='')
-# 		sleep(4)
-# 		print(" Dropped")
-
 
 if __name__=='__main__':
+
+	pygame.init()
+	pygame.camera.init()
+
 	
 	# 
 	# positions:
@@ -156,10 +140,8 @@ if __name__=='__main__':
 		f"\nThis user will be asked to choose a color."
 		f"\nThe colors are indexed as:"
 		f"\n	0: Red"
-		f"\n	1: Yellow"
-		f"\n	2: Green"
-		f"\n	3: Blue"
-		f"\nOnly three of these colors are available to pick from [ 0  2  3 ]\n"
+		f"\n	1: Green"
+		f"\n	2: Blue"
 		f"\nThree Regions Of Interest or ROIs are extracted from the captured image."
 		f"\nThese ROIs will be examined to find the object with the choosen color."
 		f"\nOnce the position is determined the arm will signaled to extract the object."
@@ -172,7 +154,7 @@ if __name__=='__main__':
 	try:
 		choice = int(input("\nEnter the color index [default 0]: "))
 
-		if choice not in [ 0, 1, 2, 3]:
+		if choice not in [ 0, 1, 2]:
 			print(
 				f"[WARN] Invalid user input\n"
 				f"[WARN] Using default color index [0]"
@@ -185,8 +167,8 @@ if __name__=='__main__':
 				)
 		choice = 0
 
-	image = captureImage(1)
-	# image = cv.imread("../sample.png")
+	captureImage(1)
+	image = cv.imread("/tmp/captured_image.png")
 	
 	rois = list()
 
@@ -196,7 +178,7 @@ if __name__=='__main__':
 
 	found = False
 	for i,region in enumerate(rois):
-		color = getColor(getAvgHSV(region))
+		color = getColor(getAvgBGR(region))
 		if color == choice:
 			found = True
 			print(f"[INFO] Found color [{choice}] at position [{i}]")

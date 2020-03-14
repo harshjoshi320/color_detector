@@ -9,6 +9,18 @@ from pyA20.gpio import gpio, port
 from arm_control import Arm
 # from matplotlib import pyplot as plt
 
+# 
+# positions:
+# 
+# pos 0:	[y0, y1], [x0, x1]
+# pos 1:	[y0, y1], [x0, x1]
+# pos 2:	[y0, y1], [x0, x1]
+# 
+positions = (
+		([384, 430], [61, 121]),
+		([284, 333], [314, 365]),
+		([104, 160], [470, 530])
+		)
 
 def captureImage(dev_index):
 	'''
@@ -33,7 +45,7 @@ def captureImage(dev_index):
 	image = camera.get_image()
 	pygame.image.save(image, "/tmp/captured_image.png")
 
-def extractROI(rangey, rangex, image):
+def extractROI(rangey, rangex, image, debug=0):
 	'''
 	numpy.ndarray extractROI(list, list, numpy.ndarray):
 	Takes x and y ranges and returns the 'Region Of Interest'
@@ -42,13 +54,12 @@ def extractROI(rangey, rangex, image):
 	if isinstance(image, np.ndarray):
 		# Extracts the Region of Interest
 		roi = image[rangey[0]:rangey[1], rangex[0]:rangex[1]]
-		# print("[INFO] Extracted ROI")
+		if debug != 0 :
+			# Display the extracted ROI
+			cv.imshow("ROI",roi)
+			cv.waitKey(0)
+			cv.destroyAllWindows()
 
-		# Display the extracted ROI
-		cv.imshow("ROI",roi)
-		cv.waitKey(0)
-		cv.destroyAllWindows()
-		# cv.imwrite(f"{str(rangex[0])}.png", roi)
 		return roi
 	else:
 		print("[WARN] No Image Found!")
@@ -78,15 +89,14 @@ def getAvgBGR(img):
 			prop_sum = prop_sum + (hists[i][j][0] * j)
 		avg_bgr[prop] = round(prop_sum/(img_size[0]*img_size[1]))
 
-	print(
-			f"Average BGR Values\n" 
-			f"+-------------------\n"
-			f"| {'B':<11}: {avg_bgr['b']:>5}\n"
-			f"| {'G':<11}: {avg_bgr['g']:>5}\n"
-			f"| {'R':<11}: {avg_bgr['r']:>5}\n"
-			)
+	# print(
+	# 		f"Average BGR Values\n" 
+	# 		f"+-------------------\n"
+	# 		f"| {'B':<11}: {avg_bgr['b']:>5}\n"
+	# 		f"| {'G':<11}: {avg_bgr['g']:>5}\n"
+	# 		f"| {'R':<11}: {avg_bgr['r']:>5}\n"
+	# 		)
 
-	print(avg_bgr)
 	return avg_bgr
 
 
@@ -101,52 +111,30 @@ def getColor(bgr):
 	other: -1
 	'''
 	if bgr['b']>bgr['g'] and bgr['b']>bgr['r']:
-		return 2
+		if ( (bgr['b']-bgr['r']) + (bgr['b']-bgr['g']) ) >= 50 :
+			return 2
+		else:
+			return -1
 	elif bgr['g']>bgr['b'] and bgr['g']>bgr['r']:
-		return 1
+		if ( (bgr['g']-bgr['b']) + (bgr['g']-bgr['r']) ) >= 50 :
+			return 1
+		else:
+			return -1
 	elif bgr['r']>bgr['b'] and bgr['r']>bgr['g']:
-		return 0
+		if ( (bgr['r']-bgr['b']) + (bgr['r']-bgr['g']) ) >= 50 :
+			return 0
+		else:
+			return -1
 	else:
 		return -1
 
+def dummy_drop(pos):
+	print(f'dropped at {pos}')
 
-if __name__=='__main__':
-
-	pygame.init()
-	pygame.camera.init()
-
-	
-	# 
-	# positions:
-	# 
-	# pos 0:	[y0, y1], [x0, x1]
-	# pos 1:	[y0, y1], [x0, x1]
-	# pos 2:	[y0, y1], [x0, x1]
-	# 
-
-	positions = (
-		([384, 430], [61, 121]),
-		([284, 333], [314, 365]),
-		([104, 160], [470, 530])
-		)
+def picker():
 
 	arm = Arm([ port.PA6, port.PA12, port.PA3, port.PA11])
-
 	arm.initialize()
-
-	print(
-		f"\n#### Starting the color sorter/picker program ####\n"
-		f"\n[DESC]----\n"
-		f"\nThis user will be asked to choose a color."
-		f"\nThe colors are indexed as:"
-		f"\n	0: Red"
-		f"\n	1: Green"
-		f"\n	2: Blue"
-		f"\nThree Regions Of Interest or ROIs are extracted from the captured image."
-		f"\nThese ROIs will be examined to find the object with the choosen color."
-		f"\nOnce the position is determined the arm will signaled to extract the object."
-		f"\n----[DESC]\n"
-		)
 
 	print(f"## Choose the color to be picked")
 
@@ -154,17 +142,12 @@ if __name__=='__main__':
 	try:
 		choice = int(input("\nEnter the color index [default 0]: "))
 
+		warn_message = f"\n[WARN] Invalid user input\n[WARN] Using default color index [0]\n"
 		if choice not in [ 0, 1, 2]:
-			print(
-				f"[WARN] Invalid user input\n"
-				f"[WARN] Using default color index [0]"
-				)
+			print(warn_message)
 			choice = 0
 	except ValueError:
-		print(
-				f"[WARN] Invalid user input\n"
-				f"[WARN] Using default color index [0]"
-				)
+		print(warn_message)
 		choice = 0
 
 	captureImage(1)
@@ -189,3 +172,58 @@ if __name__=='__main__':
 
 	if not found:
 		print(f"[WARN] Color with index [{choice}] not found")
+
+def sorter():
+	print("\nSorting... \n")
+	captureImage(1)
+	image = cv.imread('/tmp/captured_image.png')
+	
+	rois = list()
+	
+	for i,(y,x) in enumerate(positions):
+		rois.append(extractROI(y, x, image, 1))
+		print(f"[INFO] Extracted ROI at position:{i}")
+
+	for pos, roi in enumerate(rois):
+		color = getColor(getAvgBGR(roi))
+		if color != -1:
+			pick(pos)
+			dummy_drop(color)
+
+
+
+if __name__=='__main__':
+
+	pygame.init()
+	pygame.camera.init()
+
+	print(
+		f"\n#### Starting the color sorter/picker program ####\n"
+		f"\n[DESC]----\n"
+		f"\nThis is The Color Sorter/Picker Robotic Arm"
+		f"\nChoose either the sorter or picker program\n"
+		f"\nIn the Color Picker program, user will be asked to choose a color."
+		f"\nThe colors are indexed as:"
+		f"\n	0: Red"
+		f"\n	1: Green"
+		f"\n	2: Blue"
+		f"\nThree Regions Of Interest or ROIs are extracted from the captured image."
+		f"\nThese ROIs will be examined to find the object with the choosen color."
+		f"\nOnce the position is determined the arm will signaled to extract the object."
+		f"\n\nIn case of Color Sorter program the arm will automatically sort the three object"
+		f"\nin R G B sequence."
+		f"\n The program can be closed by KeyboardInterrupt(Ctrl+c)."
+		f"\n----[DESC]\n"
+		)
+	while True:
+		choice = '0'
+		choice = input(
+			f"\n### Select a program:\n"
+			f"    0:Color Picker [default]\n"
+			f"    1:Color Sorter\n"
+			f"Run: "
+			)
+		if choice == '1':
+			sorter()
+		else:
+			picker()

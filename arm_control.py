@@ -87,7 +87,7 @@ class Arm():
     
     def pick(self, pos=0):
         print(f"[INFO] Start Routine: Pick At Pos-{pos}... ", end='')
-        positions = [0, 25, 50]
+        positions = [0, 24, 50]
         self.initialize()
         self.shoulder.setAngle(positions[pos]); sleep(1)
         self.shoulder.stop()

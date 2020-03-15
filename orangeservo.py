@@ -9,6 +9,10 @@ class Servo:
         self.pwm = OrangePwm(self.frequency, self.port)
         self.pwm.start(0)
 
+    def __del__(self):
+        self.pwm.stop()
+        del self.pwm
+
     def setAngle(self, angle):
         duty = round(((angle/18) + 2.5),1)
         self.pwm.changeDutyCycle(duty)

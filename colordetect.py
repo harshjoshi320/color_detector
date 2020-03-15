@@ -1,4 +1,4 @@
-# import sys
+import sys
 import cv2 as cv
 import numpy as np
 import pygame, pygame.camera
@@ -8,6 +8,9 @@ from orangeservo import Servo
 from pyA20.gpio import gpio, port
 from arm_control import Arm
 # from matplotlib import pyplot as plt
+
+# Defining gpio ports for arm
+ports = [ port.PA6, port.PA12, port.PA3, port.PA11]
 
 # 
 # positions:
@@ -19,7 +22,7 @@ from arm_control import Arm
 positions = (
 		([384, 430], [61, 121]),
 		([284, 333], [314, 365]),
-		([104, 160], [470, 530])
+		([141, 192], [437, 481])
 		)
 
 def captureImage(dev_index):
@@ -44,6 +47,8 @@ def captureImage(dev_index):
 	camera.start()
 	image = camera.get_image()
 	pygame.image.save(image, "/tmp/captured_image.png")
+	camera.stop()
+	del camera
 
 def extractROI(rangey, rangex, image, debug=0):
 	'''
@@ -133,16 +138,15 @@ def dummy_drop(pos):
 
 def picker():
 
-	arm = Arm([ port.PA6, port.PA12, port.PA3, port.PA11])
+	arm = Arm(ports)
 	arm.initialize()
 
 	print(f"## Choose the color to be picked")
 
-
+	warn_message = f"\n[WARN] Invalid user input\n[WARN] Using default color index [0]\n"
 	try:
 		choice = int(input("\nEnter the color index [default 0]: "))
 
-		warn_message = f"\n[WARN] Invalid user input\n[WARN] Using default color index [0]\n"
 		if choice not in [ 0, 1, 2]:
 			print(warn_message)
 			choice = 0
@@ -173,7 +177,14 @@ def picker():
 	if not found:
 		print(f"[WARN] Color with index [{choice}] not found")
 
+	del arm
+
+
 def sorter():
+
+	arm = Arm(ports)
+	arm.initialize()
+
 	print("\nSorting... \n")
 	captureImage(1)
 	image = cv.imread('/tmp/captured_image.png')
@@ -181,14 +192,16 @@ def sorter():
 	rois = list()
 	
 	for i,(y,x) in enumerate(positions):
-		rois.append(extractROI(y, x, image, 1))
+		rois.append(extractROI(y, x, image, 0))
 		print(f"[INFO] Extracted ROI at position:{i}")
 
 	for pos, roi in enumerate(rois):
 		color = getColor(getAvgBGR(roi))
 		if color != -1:
-			pick(pos)
-			dummy_drop(color)
+			arm.pick(pos)
+			arm.drop(color)
+
+	del arm
 
 
 
@@ -196,6 +209,10 @@ if __name__=='__main__':
 
 	pygame.init()
 	pygame.camera.init()
+
+	tmp_arm = Arm(ports)
+	tmp_arm.fullSweep()
+	del tmp_arm
 
 	print(
 		f"\n#### Starting the color sorter/picker program ####\n"
@@ -211,8 +228,7 @@ if __name__=='__main__':
 		f"\nThese ROIs will be examined to find the object with the choosen color."
 		f"\nOnce the position is determined the arm will signaled to extract the object."
 		f"\n\nIn case of Color Sorter program the arm will automatically sort the three object"
-		f"\nin R G B sequence."
-		f"\n The program can be closed by KeyboardInterrupt(Ctrl+c)."
+		f"\nin R G B sequence.\n"
 		f"\n----[DESC]\n"
 		)
 	while True:
@@ -221,9 +237,13 @@ if __name__=='__main__':
 			f"\n### Select a program:\n"
 			f"    0:Color Picker [default]\n"
 			f"    1:Color Sorter\n"
+			f"    q:Exit program\n"
 			f"Run: "
 			)
 		if choice == '1':
 			sorter()
+		elif choice.lower() == 'q':
+			print("Exiting :)")
+			sys.exit()
 		else:
 			picker()
